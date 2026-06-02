@@ -674,6 +674,56 @@ describe("LLMRouter", () => {
   });
 
   describe("completeWithTools - Anthropic", () => {
+    it("should reject Anthropic tool uses without id", async () => {
+      const config: LLMProviderConfig = {
+        name: "minimax",
+        baseUrl: "https://api.minimax.io/anthropic/v1",
+        apiKey: "test-minimax-key",
+        model: "MiniMax-M2.7-highspeed",
+        maxTokens: 4096,
+      };
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          content: [{ type: "tool_use", name: "lookup", input: {} }],
+        }),
+      );
+
+      const router = new LLMRouter(config);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "hello" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("tool_use missing id");
+    });
+
+    it("should reject Anthropic tool uses without name", async () => {
+      const config: LLMProviderConfig = {
+        name: "minimax",
+        baseUrl: "https://api.minimax.io/anthropic/v1",
+        apiKey: "test-minimax-key",
+        model: "MiniMax-M2.7-highspeed",
+        maxTokens: 4096,
+      };
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          content: [{ type: "tool_use", id: "call-1", input: {} }],
+        }),
+      );
+
+      const router = new LLMRouter(config);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "hello" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("tool_use missing name");
+    });
+
     it("should reject Anthropic tool uses with non-object input", async () => {
       const config: LLMProviderConfig = {
         name: "minimax",

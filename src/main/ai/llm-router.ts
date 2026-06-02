@@ -464,6 +464,8 @@ export class LLMRouter {
         const toolResults: Array<{ type: "tool_result"; tool_use_id: string; content: string }> = [];
         for (const block of toolUseBlocks) {
           let result: string;
+          if (!block.id) throw new Error("tool_use missing id");
+          if (!block.name) throw new Error("tool_use missing name");
           if (!isRecord(block.input)) throw new Error("tool_use input must be an object");
           try {
             result = await callTool(block.name, block.input);

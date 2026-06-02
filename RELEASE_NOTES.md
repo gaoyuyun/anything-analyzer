@@ -1,16 +1,16 @@
-# Anything Analyzer v3.6.41
+# Anything Analyzer v3.6.42
 
 ## 修复
 
-- **Anthropic/MiniMax 工具参数校验** — 避免非对象 tool_use.input 被当作正常工具参数执行
-  - 工具调用入站阶段直接拒绝字符串、数组等非对象 input
-  - 新增回归测试覆盖 Anthropic 兼容工具调用参数类型异常路径
+- **Anthropic/MiniMax 工具调用字段校验** — 避免缺少 id/name 的 tool_use 进入工具执行轮次
+  - 工具调用入站阶段直接拒绝缺少 id 或 name 的 tool_use
+  - 新增回归测试覆盖 Anthropic 兼容工具调用字段缺失路径
 
 ## 下载
 
 | 平台 | 文件 |
 |------|------|
-| Windows | Anything-Analyzer-Setup-3.6.41.exe |
-| macOS (Apple Silicon) | Anything-Analyzer-3.6.41-arm64.dmg |
-| macOS (Intel) | Anything-Analyzer-3.6.41-x64.dmg |
-| Linux | Anything-Analyzer-3.6.41.AppImage |
+| Windows | Anything-Analyzer-Setup-3.6.42.exe |
+| macOS (Apple Silicon) | Anything-Analyzer-3.6.42-arm64.dmg |
+| macOS (Intel) | Anything-Analyzer-3.6.42-x64.dmg |
+| Linux | Anything-Analyzer-3.6.42.AppImage |

@@ -347,6 +347,9 @@ export class LLMRouter {
       if (!isRecord(assistantMsg)) {
         throw new Error(`LLM 响应格式异常: 缺少 message 字段 — ${JSON.stringify(data).slice(0, 200)}`);
       }
+      if (assistantMsg.tool_calls !== undefined && !Array.isArray(assistantMsg.tool_calls)) {
+        throw new Error("tool_calls must be an array");
+      }
 
       // Has tool calls → execute and continue loop
       if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {

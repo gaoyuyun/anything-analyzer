@@ -728,6 +728,31 @@ describe("LLMRouter", () => {
       ).rejects.toThrow("LLM 响应格式异常: 缺少 message 字段");
     });
 
+    it("should reject OpenAI tool calls when tool_calls is not an array", async () => {
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          choices: [
+            {
+              message: {
+                content: null,
+                tool_calls: { id: "call-1" },
+              },
+            },
+          ],
+        }),
+      );
+
+      const router = new LLMRouter(baseConfig);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "test" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("tool_calls must be an array");
+    });
+
     it("should reject OpenAI tool calls without ids", async () => {
       fetchSpy.mockResolvedValueOnce(
         createJSONResponse({

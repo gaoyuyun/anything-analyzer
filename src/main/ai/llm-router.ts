@@ -354,8 +354,8 @@ export class LLMRouter {
       // Has tool calls → execute and continue loop
       if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {
         for (const tc of assistantMsg.tool_calls) {
-          if (!tc.id) throw new Error("tool_call missing id");
-          if (!tc.function?.name) throw new Error("tool_call missing name");
+          if (typeof tc.id !== "string" || tc.id.length === 0) throw new Error("tool_call missing id");
+          if (typeof tc.function?.name !== "string" || tc.function.name.length === 0) throw new Error("tool_call missing name");
           if (typeof tc.function?.arguments !== "string") throw new Error("tool_call arguments must be a string");
         }
 
@@ -472,8 +472,8 @@ export class LLMRouter {
 
       if (toolUseBlocks.length > 0) {
         for (const block of toolUseBlocks) {
-          if (!block.id) throw new Error("tool_use missing id");
-          if (!block.name) throw new Error("tool_use missing name");
+          if (typeof block.id !== "string" || block.id.length === 0) throw new Error("tool_use missing id");
+          if (typeof block.name !== "string" || block.name.length === 0) throw new Error("tool_use missing name");
           if (!isRecord(block.input)) throw new Error("tool_use input must be an object");
         }
 
@@ -595,8 +595,8 @@ export class LLMRouter {
 
       if (functionCalls.length > 0) {
         for (const fc of functionCalls) {
-          if (!fc.call_id) throw new Error("function_call missing call_id");
-          if (!fc.name) throw new Error("function_call missing name");
+          if (typeof fc.call_id !== "string" || fc.call_id.length === 0) throw new Error("function_call missing call_id");
+          if (typeof fc.name !== "string" || fc.name.length === 0) throw new Error("function_call missing name");
           if (typeof fc.arguments !== "string") throw new Error("function_call arguments must be a string");
         }
 

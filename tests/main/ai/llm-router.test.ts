@@ -557,6 +557,33 @@ describe("LLMRouter", () => {
       ).rejects.toThrow("function_call missing call_id");
     });
 
+    it("should reject Responses API function calls with non-string names", async () => {
+      const config: LLMProviderConfig = { ...baseConfig, apiType: "responses" };
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          output: [
+            {
+              type: "function_call",
+              id: "fc-1",
+              call_id: "call-1",
+              name: 123,
+              arguments: "{}",
+            },
+          ],
+        }),
+      );
+
+      const router = new LLMRouter(config);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "test" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("function_call missing name");
+    });
+
     it("should use Responses API call_id when returning function outputs", async () => {
       const config: LLMProviderConfig = { ...baseConfig, apiType: "responses" };
       fetchSpy.mockResolvedValueOnce(
@@ -762,6 +789,37 @@ describe("LLMRouter", () => {
                 content: null,
                 tool_calls: [
                   {
+                    type: "function",
+                    function: { name: "lookup", arguments: "{}" },
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      );
+
+      const router = new LLMRouter(baseConfig);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "test" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("tool_call missing id");
+    });
+
+    it("should reject OpenAI tool calls with non-string ids", async () => {
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          choices: [
+            {
+              message: {
+                content: null,
+                tool_calls: [
+                  {
+                    id: 123,
                     type: "function",
                     function: { name: "lookup", arguments: "{}" },
                   },
@@ -989,6 +1047,31 @@ describe("LLMRouter", () => {
           async () => "unused",
         ),
       ).rejects.toThrow("tool_use missing name");
+    });
+
+    it("should reject Anthropic tool uses with non-string ids", async () => {
+      const config: LLMProviderConfig = {
+        name: "minimax",
+        baseUrl: "https://api.minimax.io/anthropic/v1",
+        apiKey: "test-minimax-key",
+        model: "MiniMax-M2.7-highspeed",
+        maxTokens: 4096,
+      };
+      fetchSpy.mockResolvedValueOnce(
+        createJSONResponse({
+          content: [{ type: "tool_use", id: 123, name: "lookup", input: {} }],
+        }),
+      );
+
+      const router = new LLMRouter(config);
+
+      await expect(
+        router.completeWithTools(
+          [{ role: "user", content: "hello" }],
+          [{ name: "lookup", description: "Lookup", inputSchema: { type: "object" } }],
+          async () => "unused",
+        ),
+      ).rejects.toThrow("tool_use missing id");
     });
 
     it("should reject Anthropic tool uses with non-object input", async () => {
